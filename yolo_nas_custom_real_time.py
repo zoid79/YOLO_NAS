@@ -5,7 +5,7 @@ from super_gradients.training.metrics import DetectionMetrics_050
 from super_gradients.training.models.detection_models.pp_yolo_e import PPYoloEPostPredictionCallback
 from super_gradients.training import models
 from super_gradients.training.utils.callbacks import LinearEpochLRWarmup
-
+print(torch.cuda.is_available())
 #-- GPU 설정
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
@@ -135,8 +135,6 @@ train_params = {
     "metric_to_watch": 'mAP@0.50'
 }
 #%%
-model.eval()
-torch.no_grad()
 trainer.train(model=model,
               training_params=train_params,
               train_loader=train_data,
@@ -144,7 +142,7 @@ trainer.train(model=model,
 #%%
 best_model = models.get('yolo_nas_l',
                         num_classes=len(dataset_params['classes']),
-                        checkpoint_path="/content/checkpoints/Pokemon_yolonas_run/RUN_20231226_114257_787184/ckpt_best.pth")
+                        checkpoint_path="checkpoints/Pokemon_yolonas_run/RUN_20240327_183859_470631/ckpt_best.pth")
                         #-- ckpt_best.pth 파일이 있는 경로를 찾아서 넣어주세용
 #%%
 trainer.test(model=best_model,
@@ -163,8 +161,17 @@ import locale
 def getpreferredencoding(do_setlocale = True):
     return "UTF-8"
 locale.getpreferredencoding = getpreferredencoding
+#%%
+import cv2
+import torch
+from super_gradients.training import models
+from super_gradients.common.object_names import Models
 
-#!gdown "https://drive.google.com/uc?id=1HsCBy8HU0Rqs-nb_mScRXVmLwrY1G3UQ"
+model = models.get('yolo_nas_l',num_classes=3,checkpoint_path='checkpoints/Pokemon_yolonas_run/RUN_20240327_183859_470631/ckpt_best.pth')
+
+
+model.predict_webcam()
+
 #%%
 input_video_path = f"/content/pokemon.mp4"
 output_video_path = "detections.mp4"
